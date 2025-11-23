@@ -1,5 +1,5 @@
 // Project A: Azure Landing Zone
-// Hub–Spoke + Private Endpoints (Storage, SQL) + App Service + Monitoring
+// Hub–Spoke + Private Endpoints (Storage, SQL, Key Vault) + App Service + Monitoring
 
 targetScope = 'subscription'
 
@@ -14,6 +14,10 @@ param rgName string = 'rg-projectA-${environment}'
 
 @description('Global name prefix for resources')
 param resourceNamePrefix string = 'prja'
+
+@secure()
+@description('SQL admin password for the Project A SQL Server')
+param sqlAdminPassword string
 
 @description('Tags to apply to all resources')
 param commonTags object = {
@@ -35,7 +39,19 @@ resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 // Network: Hub + Spoke + NSG + Peering
 // ------------------------------------------
 
-// Hub VNet (uses vnet.bicep)
+// App subnet NSG
+module appNsg '../infra-lib/infra/modules/networking/nsg.bicep' = {
+  name: 'nsg-app-${environment}'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    resourceNamePrefix: '${resourceNamePrefix}-app'
+    tags: commonTags
+  }
+}
+
+// Hub VNet (no NSG needed here)
 module hubVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
   name: 'hub-vnet-${environment}'
   scope: rg
@@ -48,10 +64,11 @@ module hubVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
     appSubnetPrefix: '10.0.1.0/24'
     dataSubnetPrefix: '10.0.2.0/24'
     monitorSubnetPrefix: '10.0.3.0/24'
+    appSubnetNsgId: null
   }
 }
 
-// Spoke / App VNet
+// Spoke / App VNet (NSG bound to app subnet)
 module spokeVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
   name: 'spoke-vnet-${environment}'
   scope: rg
@@ -64,6 +81,7 @@ module spokeVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
     appSubnetPrefix: '10.10.1.0/24'
     dataSubnetPrefix: '10.10.2.0/24'
     monitorSubnetPrefix: '10.10.3.0/24'
+    appSubnetNsgId: appNsg.outputs.nsgId
   }
 }
 
@@ -92,7 +110,6 @@ module storage '../infra-lib/infra/modules/data/storage-account.bicep' = {
     environment: environment
     resourceNamePrefix: resourceNamePrefix
     tags: commonTags
-    vnetSubnetId: spokeVnet.outputs.dataSubnetId
   }
 }
 
@@ -105,7 +122,7 @@ module sql '../infra-lib/infra/modules/data/sqlserver-db.bicep' = {
     environment: environment
     resourceNamePrefix: resourceNamePrefix
     tags: commonTags
-    vnetSubnetId: spokeVnet.outputs.dataSubnetId
+    administratorLoginPassword: sqlAdminPassword
   }
 }
 
@@ -154,6 +171,37 @@ module logAnalytics '../infra-lib/infra/modules/monitoring/log-analytics.bicep' 
   }
 }
 
+// ------------------------------------------
+// Key Vault (locked down + private endpoint)
+// ------------------------------------------
+
+module keyVault '../infra-lib/infra/modules/security/keyvault.bicep' = {
+  name: 'kv-${environment}'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    resourceNamePrefix: resourceNamePrefix
+    tags: commonTags
+    // put Key Vault access on the data subnet
+    vnetSubnetId: spokeVnet.outputs.dataSubnetId
+  }
+}
+
+// Private Endpoint: Key Vault
+module kvPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.bicep' = {
+  name: 'pe-kv-${environment}'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    tags: commonTags
+    vnetSubnetId: spokeVnet.outputs.dataSubnetId
+    targetResourceId: keyVault.outputs.keyVaultId
+    subResourceName: 'vault'
+  }
+}
+
 // App Service (for web/API workload)
 module appService '../infra-lib/infra/modules/compute/appservice-webapi.bicep' = {
   name: 'appsvc-${environment}'
@@ -164,7 +212,8 @@ module appService '../infra-lib/infra/modules/compute/appservice-webapi.bicep' =
     resourceNamePrefix: resourceNamePrefix
     tags: commonTags
     subnetId: spokeVnet.outputs.appSubnetId
-    keyVaultUri: '' // no Key Vault yet in this simplified version
+    // now wired to real Key Vault URI
+    keyVaultUri: keyVault.outputs.keyVaultUri
   }
 }
 
@@ -177,7 +226,6 @@ module appInsights '../infra-lib/infra/modules/monitoring/app-insights.bicep' = 
     environment: environment
     resourceNamePrefix: resourceNamePrefix
     tags: commonTags
-    appServiceName: appService.outputs.appServiceName
     logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
   }
 }
@@ -191,3 +239,5 @@ output spokeVnetId string = spokeVnet.outputs.vnetId
 output storageBlobEndpoint string = storage.outputs.primaryBlobEndpoint
 output logAnalyticsWorkspaceId string = logAnalytics.outputs.workspaceId
 output appServiceName string = appService.outputs.appServiceName
+output keyVaultId string = keyVault.outputs.keyVaultId
+output keyVaultUri string = keyVault.outputs.keyVaultUri
