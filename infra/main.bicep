@@ -47,7 +47,6 @@ module appNsg '../infra-lib/infra/modules/networking/nsg.bicep' = {
     // NSG module only supports: name, rules
     name: 'nsg-${resourceNamePrefix}-app-${environment}'
     // No custom rules yet -> rely on default NSG rules
-    // You can add rules here later if you want to tighten traffic.
     rules: []
   }
 }
@@ -165,10 +164,8 @@ module logAnalytics '../infra-lib/infra/modules/monitoring/log-analytics.bicep' 
   name: 'law-${environment}'
   scope: rg
   params: {
+    name: '${resourceNamePrefix}-law-${environment}'
     location: location
-    environment: environment
-    resourceNamePrefix: resourceNamePrefix
-    tags: commonTags
     retentionInDays: 30
   }
 }
@@ -181,12 +178,10 @@ module keyVault '../infra-lib/infra/modules/security/keyvault.bicep' = {
   name: 'kv-${environment}'
   scope: rg
   params: {
+    name: '${resourceNamePrefix}-kv-${environment}'
     location: location
-    environment: environment
-    resourceNamePrefix: resourceNamePrefix
-    tags: commonTags
-    // put Key Vault access on the data subnet
-    vnetSubnetId: spokeVnet.outputs.dataSubnetId
+    // wired into Log Analytics workspace for diagnostics
+    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
   }
 }
 
