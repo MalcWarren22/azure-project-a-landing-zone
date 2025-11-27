@@ -44,10 +44,11 @@ module appNsg '../infra-lib/infra/modules/networking/nsg.bicep' = {
   name: 'nsg-app-${environment}'
   scope: rg
   params: {
-    location: location
-    environment: environment
-    resourceNamePrefix: '${resourceNamePrefix}-app'
-    tags: commonTags
+    // NSG module only supports: name, rules
+    name: 'nsg-${resourceNamePrefix}-app-${environment}'
+    // No custom rules yet -> rely on default NSG rules
+    // You can add rules here later if you want to tighten traffic.
+    rules: []
   }
 }
 
@@ -110,6 +111,7 @@ module storage '../infra-lib/infra/modules/data/storage-account.bicep' = {
     environment: environment
     resourceNamePrefix: resourceNamePrefix
     tags: commonTags
+    vnetSubnetId: spokeVnet.outputs.dataSubnetId
   }
 }
 
