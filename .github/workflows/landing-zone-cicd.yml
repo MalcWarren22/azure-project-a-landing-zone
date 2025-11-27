@@ -25,6 +25,20 @@ jobs:
           submodules: true
           fetch-depth: 0
 
+      - name: Debug repo layout
+        run: |
+          pwd
+          echo "---- root ----"
+          ls
+          echo "---- infra ----"
+          ls infra || echo "infra missing"
+          echo "---- infra-lib ----"
+          ls infra-lib || echo "infra-lib missing"
+          echo "---- infra-lib/infra ----"
+          ls infra-lib/infra || echo "infra-lib/infra missing"
+          echo "---- infra-lib/infra/modules ----"
+          ls infra-lib/infra/modules || echo "infra-lib/infra/modules missing"
+
       - name: Azure Login (Dev)
         uses: azure/login@v2
         with:
