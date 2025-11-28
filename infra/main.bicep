@@ -40,7 +40,7 @@ resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 // ------------------------------------------
 
 // App subnet NSG
-module appNsg '../infra-lib/infra/modules/networking/nsg.bicep' = {
+module appNsg 'infra-lib/infra/modules/networking/nsg.bicep' = {
   name: 'nsg-app-${environment}'
   scope: rg
   params: {
@@ -50,7 +50,7 @@ module appNsg '../infra-lib/infra/modules/networking/nsg.bicep' = {
 }
 
 // Hub VNet
-module hubVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
+module hubVnet 'infra-lib/infra/modules/networking/vnet.bicep' = {
   name: 'hub-vnet-${environment}'
   scope: rg
   params: {
@@ -67,7 +67,7 @@ module hubVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
 }
 
 // Spoke VNet
-module spokeVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
+module spokeVnet 'infra-lib/infra/modules/networking/vnet.bicep' = {
   name: 'spoke-vnet-${environment}'
   scope: rg
   params: {
@@ -84,7 +84,7 @@ module spokeVnet '../infra-lib/infra/modules/networking/vnet.bicep' = {
 }
 
 // Hub ⇄ Spoke peering
-module vnetPeering '../infra-lib/infra/modules/networking/vnet-peering.bicep' = {
+module vnetPeering 'infra-lib/infra/modules/networking/vnet-peering.bicep' = {
   name: 'hub-spoke-peering-${environment}'
   scope: rg
   params: {
@@ -100,7 +100,7 @@ module vnetPeering '../infra-lib/infra/modules/networking/vnet-peering.bicep' = 
 // ------------------------------------------
 
 // Storage Account
-module storage '../infra-lib/infra/modules/data/storage-account.bicep' = {
+module storage 'infra-lib/infra/modules/data/storage-account.bicep' = {
   name: 'stg-${environment}'
   scope: rg
   params: {
@@ -113,7 +113,7 @@ module storage '../infra-lib/infra/modules/data/storage-account.bicep' = {
 }
 
 // SQL Server + Database
-module sql '../infra-lib/infra/modules/data/sqlserver-db.bicep' = {
+module sql 'infra-lib/infra/modules/data/sqlserver-db.bicep' = {
   name: 'sql-${environment}'
   scope: rg
   params: {
@@ -126,7 +126,7 @@ module sql '../infra-lib/infra/modules/data/sqlserver-db.bicep' = {
 }
 
 // Private Endpoint: Storage
-module stgPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.bicep' = {
+module stgPrivateEndpoint 'infra-lib/infra/modules/security/private-endpoint.bicep' = {
   name: 'pe-stg-${environment}'
   scope: rg
   params: {
@@ -140,7 +140,7 @@ module stgPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.
 }
 
 // Private Endpoint: SQL
-module sqlPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.bicep' = {
+module sqlPrivateEndpoint 'infra-lib/infra/modules/security/private-endpoint.bicep' = {
   name: 'pe-sql-${environment}'
   scope: rg
   params: {
@@ -158,7 +158,7 @@ module sqlPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.
 // ------------------------------------------
 
 // Log Analytics Workspace
-module logAnalytics '../infra-lib/infra/modules/monitoring/log-analytics.bicep' = {
+module logAnalytics 'infra-lib/infra/modules/monitoring/log-analytics.bicep' = {
   name: 'law-${environment}'
   scope: rg
   params: {
@@ -171,7 +171,7 @@ module logAnalytics '../infra-lib/infra/modules/monitoring/log-analytics.bicep' 
 }
 
 // Key Vault
-module keyVault '../infra-lib/infra/modules/security/keyvault.bicep' = {
+module keyVault 'infra-lib/infra/modules/security/keyvault.bicep' = {
   name: 'kv-${environment}'
   scope: rg
   params: {
@@ -182,7 +182,7 @@ module keyVault '../infra-lib/infra/modules/security/keyvault.bicep' = {
 }
 
 // Private Endpoint: Key Vault
-module kvPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.bicep' = {
+module kvPrivateEndpoint 'infra-lib/infra/modules/security/private-endpoint.bicep' = {
   name: 'pe-kv-${environment}'
   scope: rg
   params: {
@@ -196,7 +196,7 @@ module kvPrivateEndpoint '../infra-lib/infra/modules/security/private-endpoint.b
 }
 
 // App Service
-module appService '../infra-lib/infra/modules/compute/appservice-webapi.bicep' = {
+module appService 'infra-lib/infra/modules/compute/appservice-webapi.bicep' = {
   name: 'appsvc-${environment}'
   scope: rg
   params: {
@@ -210,7 +210,7 @@ module appService '../infra-lib/infra/modules/compute/appservice-webapi.bicep' =
 }
 
 // Application Insights
-module appInsights '../infra-lib/infra/modules/monitoring/app-insights.bicep' = {
+module appInsights 'infra-lib/infra/modules/monitoring/app-insights.bicep' = {
   name: 'appi-${environment}'
   scope: rg
   params: {
