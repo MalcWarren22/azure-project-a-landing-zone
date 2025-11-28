@@ -12,14 +12,7 @@
       "value": "rg-projectA-dev"
     },
     "resourceNamePrefix": {
-      "value": "prja-dev"
-    },
-    "commonTags": {
-      "value": {
-        "environment": "dev",
-        "project": "ProjectA-LandingZone",
-        "owner": "CloudArchitect-Dev"
-      }
+      "value": "prja"
     }
   }
 }

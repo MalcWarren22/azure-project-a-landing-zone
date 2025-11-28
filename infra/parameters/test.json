@@ -12,14 +12,7 @@
       "value": "rg-projectA-test"
     },
     "resourceNamePrefix": {
-      "value": "prja-test"
-    },
-    "commonTags": {
-      "value": {
-        "environment": "test",
-        "project": "ProjectA-LandingZone",
-        "owner": "CloudArchitect-Test"
-      }
+      "value": "prja"
     }
   }
 }
