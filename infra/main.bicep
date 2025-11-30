@@ -120,7 +120,6 @@ module storage '../infra-lib/infra/modules/data/storage-account.bicep' = {
     environment: environment
     resourceNamePrefix: resourceNamePrefix
     tags: commonTags
-    vnetSubnetId: spokeVnet.outputs.dataSubnetId
   }
 }
 
